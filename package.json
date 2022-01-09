@@ -5,8 +5,6 @@
   "source": "src/index.html",
   "dependencies": {
     "gsap": "^3.8.0",
-    "js": "^0.1.0",
-    "requirejs": "^2.3.6",
     "three": "^0.131.3"
   },
   "scripts": {
