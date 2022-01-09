@@ -1,8 +1,6 @@
-const THREE = window.THREE = require('three');
-require('three/examples/js/loaders/GLTFLoader');
-require('three/examples/js/controls/OrbitControls.js');
-
+import * as THREE from 'three';
 import gsap from 'gsap';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 
 var camera, scene, renderer, controls, intersects, cube;
 const cubes = [];
@@ -28,7 +26,7 @@ function init() {
   camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
   camera.position.set(3, 6, 10);
   // Add OrbitControls
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.autoRotate = true;
   // controls.enableKeys = true;
@@ -59,7 +57,6 @@ function init() {
   // renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
-  console.log(cubes)
 }
 
 function render() {
