@@ -29,27 +29,26 @@ function init() {
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.autoRotate = true;
-  // controls.enableKeys = true;
-
   // LIGHTS
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
   scene.add(ambientLight)
 
   const cubeSpacing = 3;
-  // const numCubes = 9;
-  let delayCounter = 0;
+  let delayCounter = .5;
   const geometry = new THREE.BoxGeometry(1, 1, 1);
 
   for (var i = -1; i <= 1; i++) {
     for (var j = -1; j <= 1; j++) {
-      const material = new THREE.MeshBasicMaterial();
-      cube = new THREE.Mesh(geometry, material);
-      cubes.push(cube);
-      scene.add(cube);
-      cube.position.set(i * cubeSpacing, 0, j * cubeSpacing);
-      let delayTime = delayCounter;
-      gsap.to(cube.position, {duration: .3, delay: delayTime, y: 2})
-      delayCounter += .5;
+      for (var k = -1; k <= 1; k++) {
+        const material = new THREE.MeshBasicMaterial();
+        cube = new THREE.Mesh(geometry, material);
+        cubes.push(cube);
+        scene.add(cube);
+        cube.position.set(i * cubeSpacing, 0, j * cubeSpacing);
+        let delayTime = delayCounter;
+        gsap.to(cube.position, {duration: .3, delay: delayTime, y: k * cubeSpacing})
+        delayCounter += .12;
+      }
     }
   }
 
@@ -80,16 +79,10 @@ function render() {
 function animate() {
 
   const elapsedTime = clock.getElapsedTime();
-  // cube.rotation.z += 0.01;
 
   render();
   requestAnimationFrame(animate);
   controls.update();
-
-  // for (var i = 0; i < scene.children.length; i++) {
-  //   scene.children[i].position.y += 0.02
-  //   scene.children[i].rotation.y += 0.02;
-  // }
 
 }
 

@@ -550,27 +550,27 @@ function init() {
     controls = new _orbitControlsJs.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.autoRotate = true;
-    // controls.enableKeys = true;
     // LIGHTS
     const ambientLight = new _three.AmbientLight(16777215, 0.5);
     scene.add(ambientLight);
     const cubeSpacing = 3;
-    // const numCubes = 9;
-    let delayCounter = 0;
+    let delayCounter = 0.5;
     const geometry = new _three.BoxGeometry(1, 1, 1);
-    for(var i = -1; i <= 1; i++)for(var j = -1; j <= 1; j++){
-        const material = new _three.MeshBasicMaterial();
-        cube = new _three.Mesh(geometry, material);
-        cubes.push(cube);
-        scene.add(cube);
-        cube.position.set(i * cubeSpacing, 0, j * cubeSpacing);
-        let delayTime = delayCounter;
-        _gsapDefault.default.to(cube.position, {
-            duration: 0.3,
-            delay: delayTime,
-            y: 2
-        });
-        delayCounter += 0.5;
+    for(var i = -1; i <= 1; i++){
+        for(var j = -1; j <= 1; j++)for(var k = -1; k <= 1; k++){
+            const material = new _three.MeshBasicMaterial();
+            cube = new _three.Mesh(geometry, material);
+            cubes.push(cube);
+            scene.add(cube);
+            cube.position.set(i * cubeSpacing, 0, j * cubeSpacing);
+            let delayTime = delayCounter;
+            _gsapDefault.default.to(cube.position, {
+                duration: 0.3,
+                delay: delayTime,
+                y: k * cubeSpacing
+            });
+            delayCounter += 0.12;
+        }
     }
     window.addEventListener('mousemove', onMouseMove, false);
     // renderer.outputEncoding = THREE.sRGBEncoding;
@@ -590,14 +590,9 @@ function render() {
 }
 function animate() {
     const elapsedTime = clock.getElapsedTime();
-    // cube.rotation.z += 0.01;
     render();
     requestAnimationFrame(animate);
     controls.update();
-// for (var i = 0; i < scene.children.length; i++) {
-//   scene.children[i].position.y += 0.02
-//   scene.children[i].rotation.y += 0.02;
-// }
 }
 function onMouseMove(event) {
     // calculate mouse position in normalized device coordinates
