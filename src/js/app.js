@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import GUI from 'lil-gui';
 
+const gui = new GUI();
 var camera, scene, renderer, controls, intersects, cube;
 const cubes = [];
 var raycaster = new THREE.Raycaster();
@@ -13,6 +15,7 @@ let cr = Math.floor(Math.random() * 255);
 let cg = Math.floor(Math.random() * 255);
 let cb = Math.floor(Math.random() * 255);
 let tagColor = new THREE.Color(`rgb(${cr}, ${cg}, ${cb})`);
+console.log(tagColor.getHexString())
 
 init();
 animate();
@@ -33,9 +36,15 @@ function init() {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
   scene.add(ambientLight)
 
-  const cubeSpacing = 3;
+  const params = {
+    cubeSpacing: 3,
+    color: tagColor
+  }
   let delayCounter = .5;
   const geometry = new THREE.BoxGeometry(1, 1, 1);
+
+  // gui.add(params, 'cubeSpacing', 0, 5, 1);
+  gui.addColor(params, 'color');
 
   for (var i = -1; i <= 1; i++) {
     for (var j = -1; j <= 1; j++) {
@@ -44,9 +53,9 @@ function init() {
         cube = new THREE.Mesh(geometry, material);
         cubes.push(cube);
         scene.add(cube);
-        cube.position.set(i * cubeSpacing, 0, j * cubeSpacing);
+        cube.position.set(i * params.cubeSpacing, 0, j * params.cubeSpacing);
         let delayTime = delayCounter;
-        gsap.to(cube.position, {duration: .3, delay: delayTime, y: k * cubeSpacing})
+        gsap.to(cube.position, {duration: .3, delay: delayTime, y: k * params.cubeSpacing})
         delayCounter += .12;
       }
     }
