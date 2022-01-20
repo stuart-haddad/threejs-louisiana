@@ -534,6 +534,9 @@ var mouse = new _three.Vector2(1, 1);
 const raycaster = new _three.Raycaster();
 const clock = new _three.Clock();
 const aspectRatio = window.innerWidth / window.innerHeight;
+let cameraCenter = new _three.Vector3();
+const cameraHorzLimit = 1;
+const cameraVertLimit = 1;
 let tagColor = new _three.Color('blue');
 let params;
 init();
@@ -559,6 +562,8 @@ function init() {
     // CAMERA
     camera = new _three.PerspectiveCamera(75, aspectRatio, 0.1, 100);
     camera.position.set(0, 0, 5);
+    cameraCenter.x = camera.position.x;
+    cameraCenter.y = camera.position.y;
     // CONTROLS
     controls = new _orbitControlsJs.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -574,13 +579,6 @@ function init() {
     document.body.appendChild(renderer.domElement);
 }
 function render() {
-    // Pan camera with movement of mouse
-    // console.log(Math.round(mouse.x * 100) / 100);
-    // if (camera.position.x > -1 && camera.position.x < 1) {
-    //   camera.position.x += Math.round(mouse.x * 100) / 100;
-    //   controls.update();
-    // }
-    // camera.position.y += mouse.y / 10;
     // Update the picking ray with the camera and mouse position
     raycaster.setFromCamera(mouse, camera);
     if (meshes && meshes.length) {
@@ -595,8 +593,14 @@ function render() {
 function animate() {
     const elapsedTime = clock.getElapsedTime();
     render();
+    updateCamera();
     requestAnimationFrame(animate);
     controls.update();
+}
+function updateCamera() {
+    // Pan camera with movement of mouse
+    camera.position.x = cameraCenter.x + cameraHorzLimit * mouse.x;
+    camera.position.y = cameraCenter.y + cameraVertLimit * mouse.y;
 }
 function onMouseMove(event) {
     // calculate mouse position in normalized device coordinates
