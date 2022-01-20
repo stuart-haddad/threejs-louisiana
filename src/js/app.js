@@ -1,65 +1,59 @@
 import * as THREE from 'three';
 import gsap from 'gsap';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import GUI from 'lil-gui';
 
 const gui = new GUI();
-var camera, scene, renderer, controls, intersects, cube;
-const cubes = [];
-var raycaster = new THREE.Raycaster();
+var camera, scene, renderer, controls, intersects;
+let model, meshes;
 var mouse = new THREE.Vector2(1, 1);
+const raycaster = new THREE.Raycaster();
 const clock = new THREE.Clock();
-
-//Generate a random tag color
-let cr = Math.floor(Math.random() * 255);
-let cg = Math.floor(Math.random() * 255);
-let cb = Math.floor(Math.random() * 255);
-let tagColor = new THREE.Color(`rgb(${cr}, ${cg}, ${cb})`);
-console.log(tagColor.getHexString())
+const aspectRatio = window.innerWidth / window.innerHeight;
+let tagColor = new THREE.Color('blue');
+let params;
 
 init();
 animate();
-render();
 
 function init() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color('skyblue');
   renderer = new THREE.WebGLRenderer({antialias: true});
-  const aspectRatio = window.innerWidth / window.innerHeight;
-  camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
-  camera.position.set(3, 6, 10);
-  // Add OrbitControls
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.autoRotate = true;
-  // LIGHTS
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-  scene.add(ambientLight)
 
-  const params = {
-    cubeSpacing: 3,
+  // GUI
+  params = {
     color: tagColor
   }
-  let delayCounter = .5;
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
-
-  // gui.add(params, 'cubeSpacing', 0, 5, 1);
   gui.addColor(params, 'color');
 
-  for (var i = -1; i <= 1; i++) {
-    for (var j = -1; j <= 1; j++) {
-      for (var k = -1; k <= 1; k++) {
-        const material = new THREE.MeshBasicMaterial();
-        cube = new THREE.Mesh(geometry, material);
-        cubes.push(cube);
-        scene.add(cube);
-        cube.position.set(i * params.cubeSpacing, 0, j * params.cubeSpacing);
-        let delayTime = delayCounter;
-        gsap.to(cube.position, {duration: .3, delay: delayTime, y: k * params.cubeSpacing})
-        delayCounter += .12;
-      }
+  //Init Loader and import model
+  var loader = new GLTFLoader();
+
+  loader.load(
+    'models/state-map.gltf',
+    function (gltf) {
+      processSplineGLTF(gltf)
+    },
+    undefined,
+    function (error) {
+      console.error(error);
     }
-  }
+  );
+
+  // CAMERA
+  camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
+  camera.position.set(0, 0, 5);
+  // CONTROLS
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  // LIGHTS
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(2, 8, 4);
+  scene.add(directionalLight);
+  const ambientLight = new THREE.AmbientLight(0xffffff, .4);
+  scene.add(ambientLight);
 
   window.addEventListener('mousemove', onMouseMove, false);
   // renderer.outputEncoding = THREE.sRGBEncoding;
@@ -68,31 +62,34 @@ function init() {
 }
 
 function render() {
+  // Pan camera with movement of mouse
+  // console.log(Math.round(mouse.x * 100) / 100);
+  // if (camera.position.x > -1 && camera.position.x < 1) {
+  //   camera.position.x += Math.round(mouse.x * 100) / 100;
+  //   controls.update();
+  // }
+    // camera.position.y += mouse.y / 10;
+  
   // Update the picking ray with the camera and mouse position
   raycaster.setFromCamera(mouse, camera);
-  // Get the objects in the scene being intersected
-  intersects = raycaster.intersectObjects(scene.children);
-  // Clear cube colors on every frame
-  for (let i = 0; i < cubes.length; i++) {
-    cubes[i].material.color.set("white");
-  }
-  if (intersects.length) {
-    for (let i = 0; i < intersects.length; i++) {
-      // Change all intersecting cubes to the same color 
-      intersects[i].object.material.color.set(tagColor);
+  if (meshes && meshes.length) {
+    // Get the objects in the scene being intersected
+    meshes.forEach(mesh => mesh.material.color.set("white"));
+    intersects = raycaster.intersectObjects(meshes);
+    if (intersects.length) {
+      for (let i = 0; i < intersects.length; i++) {
+        intersects[0].object.material.color.set(params.color);
+      }
     }
   }
   renderer.render(scene, camera);
 }
 
 function animate() {
-
   const elapsedTime = clock.getElapsedTime();
-
   render();
   requestAnimationFrame(animate);
   controls.update();
-
 }
 
 function onMouseMove(event) {
@@ -101,4 +98,19 @@ function onMouseMove(event) {
   event.preventDefault();
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  // console.log(mouse.x);
+}
+
+function processSplineGLTF(gltf) {
+  model = gltf.scene.children[0];
+  model.scale.set(.005, .005, .005);
+  model.position.set(-3, 5, 0);
+  // console.log(model);
+  scene.add(model);
+  meshes = model.children.filter(object => object.type === "Mesh");
+  meshes.forEach((mesh) => {
+    // Create a new basic material for each region so they can be highlighted individually
+    // mesh.material = new THREE.MeshStandardMaterial({color: 'white'})
+    mesh.material = new THREE.MeshBasicMaterial({color: 'white'})
+  });
 }
