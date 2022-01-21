@@ -74,7 +74,6 @@ function render() {
   raycaster.setFromCamera(mouse, camera);
   // Allow meshes to load
   if (meshes && meshes.length) {
-    // Get the objects in the scene being intersected
     meshes.forEach(mesh => {
       mesh.material.color.set(stateColor);
       mesh.material.wireframe = params.wireframe;
@@ -83,9 +82,9 @@ function render() {
       }
     });
 
+    // Get the model meshes that are being intersected
     intersects = raycaster.intersectObjects(meshes);
     if (intersects.length) {
-      window.mou
       for (let i = 0; i < intersects.length; i++) {
         let pickedObject = intersects[0].object;
         pickedObject.material.color.set(params.color);
