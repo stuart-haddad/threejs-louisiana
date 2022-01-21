@@ -538,20 +538,23 @@ let cameraCenter = new _three.Vector3();
 const cameraHorzLimit = 1;
 const cameraVertLimit = 1;
 let tagColor = new _three.Color('blue');
+let stateColor = new _three.Color('#6FD5E5');
 let params;
 init();
 animate();
 function init() {
     scene = new _three.Scene();
-    scene.background = new _three.Color('skyblue');
+    scene.background = new _three.Color('white');
     renderer = new _three.WebGLRenderer({
         antialias: true
     });
     // GUI
     params = {
-        color: tagColor
+        color: tagColor,
+        wireframe: false
     };
     gui.addColor(params, 'color');
+    gui.add(params, 'wireframe');
     //Init Loader and import model
     var loader = new _gltfloaderJs.GLTFLoader();
     loader.load('models/state-map.gltf', function(gltf) {
@@ -561,16 +564,16 @@ function init() {
     });
     // CAMERA
     camera = new _three.PerspectiveCamera(75, aspectRatio, 0.1, 100);
-    camera.position.set(0, 0, 5);
+    camera.position.set(2, 0, 5);
     cameraCenter.x = camera.position.x;
     cameraCenter.y = camera.position.y;
     // CONTROLS
     controls = new _orbitControlsJs.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     // LIGHTS
-    const directionalLight = new _three.DirectionalLight(16777215, 1);
-    directionalLight.position.set(2, 8, 4);
-    scene.add(directionalLight);
+    // const directionalLight = new THREE.DirectionalLight('#6FD5E5', 2);
+    // directionalLight.position.set(0, 0, 4);
+    // scene.add(directionalLight);
     const ambientLight = new _three.AmbientLight(16777215, 0.4);
     scene.add(ambientLight);
     window.addEventListener('mousemove', onMouseMove, false);
@@ -581,12 +584,23 @@ function init() {
 function render() {
     // Update the picking ray with the camera and mouse position
     raycaster.setFromCamera(mouse, camera);
+    // Allow meshes to load
     if (meshes && meshes.length) {
         // Get the objects in the scene being intersected
-        meshes.forEach((mesh)=>mesh.material.color.set("white")
-        );
+        meshes.forEach((mesh)=>{
+            mesh.material.color.set(stateColor);
+            mesh.material.wireframe = params.wireframe;
+            if (!mesh.animation.reversed()) mesh.animation.reverse();
+        });
         intersects = raycaster.intersectObjects(meshes);
-        if (intersects.length) for(let i = 0; i < intersects.length; i++)intersects[0].object.material.color.set(params.color);
+        if (intersects.length) {
+            window.mou;
+            for(let i = 0; i < intersects.length; i++){
+                let pickedObject = intersects[0].object;
+                pickedObject.material.color.set(params.color);
+                pickedObject.animation.play();
+            }
+        }
     }
     renderer.render(scene, camera);
 }
@@ -599,8 +613,8 @@ function animate() {
 }
 function updateCamera() {
     // Pan camera with movement of mouse
-    camera.position.x = cameraCenter.x + cameraHorzLimit * mouse.x;
-    camera.position.y = cameraCenter.y + cameraVertLimit * mouse.y;
+    camera.position.x = cameraCenter.x + cameraHorzLimit * mouse.x / 2;
+    camera.position.y = cameraCenter.y + cameraVertLimit * mouse.y / 2;
 }
 function onMouseMove(event) {
     // calculate mouse position in normalized device coordinates
@@ -608,22 +622,27 @@ function onMouseMove(event) {
     event.preventDefault();
     mouse.x = event.clientX / window.innerWidth * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-// console.log(mouse.x);
 }
 function processSplineGLTF(gltf) {
     model = gltf.scene.children[0];
     model.scale.set(0.005, 0.005, 0.005);
     model.position.set(-3, 5, 0);
-    // console.log(model);
     scene.add(model);
+    // console.log(model);
     meshes = model.children.filter((object)=>object.type === "Mesh"
     );
     meshes.forEach((mesh)=>{
-        // Create a new basic material for each region so they can be highlighted individually
-        // mesh.material = new THREE.MeshStandardMaterial({color: 'white'})
-        mesh.material = new _three.MeshBasicMaterial({
-            color: 'white'
+        // Create a new material for each region so they can be highlighted individually
+        mesh.material = new _three.MeshStandardMaterial();
+        mesh.material.metalness = 0;
+        mesh.material.roughness = 1;
+        mesh.material.flatShading = true;
+        // console.log(mesh.material);
+        mesh.animation = _gsapDefault.default.to(mesh.position, {
+            duration: 0.2,
+            z: 25
         });
+        mesh.animation.pause();
     });
 }
 
