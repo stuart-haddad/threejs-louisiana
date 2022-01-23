@@ -587,7 +587,7 @@ function init() {
     // console.log(directionalLight);
     // scene.add(directionalLight);
     pointAccentLight = new _three.PointLight('#77B5BD', 1);
-    pointAccentLight.position.set(2, 1, -1);
+    pointAccentLight.position.set(2, 0.8, -1);
     console.log(pointAccentLight);
     scene.add(pointAccentLight);
     // const sphereSize = 1;
