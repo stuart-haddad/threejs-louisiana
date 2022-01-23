@@ -10,7 +10,12 @@ let model, meshes;
 var mouse = new THREE.Vector2(1, 1);
 const raycaster = new THREE.Raycaster();
 const clock = new THREE.Clock();
-const aspectRatio = window.innerWidth / window.innerHeight;
+// Sizes
+const sizes = {
+  width: window.innerWidth,
+  height: window.innerHeight
+}
+const aspectRatio = sizes.width / sizes.height;
 let cameraCenter = new THREE.Vector3();
 const cameraHorzLimit = 1;
 const cameraVertLimit = 1;
@@ -79,8 +84,9 @@ function init() {
   scene.add(ambientLight);
 
   window.addEventListener('mousemove', onMouseMove, false);
+  window.addEventListener('resize', onResize);
   // renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(sizes.width, sizes.height);
   document.body.appendChild(renderer.domElement);
 }
 
@@ -130,6 +136,19 @@ function onMouseMove(event) {
   event.preventDefault();
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+}
+
+function onResize() {
+  // Update sizes
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+
+  // Update camera
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height);
 }
 
 function processSplineGLTF(gltf) {
