@@ -17,8 +17,8 @@ const sizes = {
 }
 const aspectRatio = sizes.width / sizes.height;
 let cameraCenter = new THREE.Vector3();
-const cameraHorzLimit = 1;
-const cameraVertLimit = 1;
+const cameraHorzLimit = .5;
+const cameraVertLimit = .5;
 let ambientLight, pointAccentLight;
 // const directionalLight = new THREE.DirectionalLight('#77B5BD', 5);
 let accentColor = new THREE.Color('#299639');
@@ -37,14 +37,13 @@ function init() {
   // GUI
   params = {
     selectionColor: tagColor,
-    wireframe: false,
     lightColor: accentColor,
     lightIntensity: 15,
   }
-  gui.addColor(params, 'selectionColor');
-  gui.add(params, 'wireframe');
-  gui.addColor(params, 'lightColor');
-  gui.add(params, 'lightIntensity', 0, 30, .5);
+  gui.domElement.style.width = '300px';
+  gui.addColor(params, 'selectionColor').name('Hover Color');
+  gui.addColor(params, 'lightColor').name('Accent Light Color');
+  gui.add(params, 'lightIntensity', 0, 30, .5).name('Accent Light Intensity');;
 
   //Init Loader and import model
   var loader = new GLTFLoader();
@@ -62,7 +61,7 @@ function init() {
 
   // CAMERA
   camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
-  camera.position.set(2, .5, 5);
+  camera.position.set(2.5, 0, 5);
   cameraCenter.x = camera.position.x;
   cameraCenter.y = camera.position.y;
   // CONTROLS
@@ -75,17 +74,17 @@ function init() {
 
   pointAccentLight = new THREE.PointLight('#77B5BD', 1);
   pointAccentLight.position.set(2, .8, -1);
-  console.log(pointAccentLight);
   scene.add(pointAccentLight);
   // const sphereSize = 1;
   // const pointAccentLightHelper = new THREE.PointLightHelper(pointAccentLight, sphereSize);
   // scene.add(pointAccentLightHelper);
-  ambientLight = new THREE.AmbientLight('#ffffff', .7);
+  ambientLight = new THREE.AmbientLight('#ffffff', .5);
   scene.add(ambientLight);
 
+  // Event Listeners
   window.addEventListener('mousemove', onMouseMove, false);
   window.addEventListener('resize', onResize);
-  // renderer.outputEncoding = THREE.sRGBEncoding;
+  window.addEventListener('click', onClick);
   renderer.setSize(sizes.width, sizes.height);
   document.body.appendChild(renderer.domElement);
 }
@@ -99,7 +98,6 @@ function render() {
   if (meshes && meshes.length) {
     meshes.forEach(mesh => {
       mesh.material.color.set(stateColor);
-      mesh.material.wireframe = params.wireframe;
       if (!mesh.animation.reversed()) {
         mesh.animation.reverse();
       }
@@ -126,8 +124,15 @@ function animate() {
 
 function updateCamera() {
   // Pan camera with movement of mouse
-  camera.position.x = cameraCenter.x + (cameraHorzLimit * mouse.x)/2;
-  camera.position.y = cameraCenter.y + (cameraVertLimit * mouse.y)/2;
+  camera.position.x = cameraCenter.x + (cameraHorzLimit * mouse.x);
+  camera.position.y = cameraCenter.y + (cameraVertLimit * mouse.y);
+}
+
+function onClick(){
+  // If hovering over a region, log its ID
+  if (intersects.length) {
+    console.log(intersects[0].object.region);
+  }
 }
 
 function onMouseMove(event) {
@@ -158,16 +163,13 @@ function processSplineGLTF(gltf) {
   scene.add(model);
   // console.log(model);
   meshes = model.children.filter(object => object.type === "Mesh");
-  meshes.forEach((mesh) => {
+  meshes.forEach((mesh, index) => {
     // Create a new material for each region so they can be highlighted individually
     mesh.material = new THREE.MeshStandardMaterial();
     mesh.material.metalness = 0;
     mesh.material.roughness = 1;
-    // mesh.material.emissive = new THREE.Color("red");
     mesh.material.flatShading = true;
-    // let line = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), new THREE.LineBasicMaterial({color: 0xff0000}));
-    // scene.add(line);
-    // console.log(mesh.geometry);
+    mesh.region = index + 1; 
     mesh.animation = gsap.to(mesh.position, {duration: .2, z: 25});
     mesh.animation.pause();
   });
