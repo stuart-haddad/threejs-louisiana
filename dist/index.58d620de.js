@@ -527,16 +527,16 @@ var _orbitControlsJs = require("three/examples/jsm/controls/OrbitControls.js");
 var _gltfloaderJs = require("three/examples/jsm/loaders/GLTFLoader.js");
 var _lilGui = require("lil-gui");
 var _lilGuiDefault = parcelHelpers.interopDefault(_lilGui);
-const gui = new _lilGuiDefault.default();
+// const gui = new GUI();
 var camera, scene, renderer, controls, intersects;
 let model, meshes;
 var mouse = new _three.Vector2(1, 1);
 const raycaster = new _three.Raycaster();
 const clock = new _three.Clock();
-// Sizes
+// Sizes - Used for Renderer Size, Aspect Ratio, and Mouse Events
 const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
+    width: document.querySelector(".three-wrap").clientWidth,
+    height: document.querySelector(".three-wrap").clientHeight
 };
 const aspectRatio = sizes.width / sizes.height;
 let cameraCenter = new _three.Vector3();
@@ -552,20 +552,21 @@ init();
 animate();
 function init() {
     scene = new _three.Scene();
-    scene.background = new _three.Color('white');
     renderer = new _three.WebGLRenderer({
-        antialias: true
+        antialias: true,
+        alpha: true
     });
+    renderer.setClearColor(0, 0);
     // GUI
     params = {
         selectionColor: tagColor,
         lightColor: accentColor,
         lightIntensity: 15
     };
-    gui.domElement.style.width = '300px';
-    gui.addColor(params, 'selectionColor').name('Hover Color');
-    gui.addColor(params, 'lightColor').name('Accent Light Color');
-    gui.add(params, 'lightIntensity', 0, 30, 0.5).name('Accent Light Intensity');
+    // gui.domElement.style.width = '300px';
+    // gui.addColor(params, 'selectionColor').name('Hover Color');
+    // gui.addColor(params, 'lightColor').name('Accent Light Color');
+    // gui.add(params, 'lightIntensity', 0, 30, .5).name('Accent Light Intensity');
     //Init Loader and import model
     var loader = new _gltfloaderJs.GLTFLoader();
     loader.load('models/state-map.gltf', function(gltf) {
@@ -579,8 +580,8 @@ function init() {
     cameraCenter.x = camera.position.x;
     cameraCenter.y = camera.position.y;
     // CONTROLS
-    controls = new _orbitControlsJs.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
+    // controls = new OrbitControls(camera, renderer.domElement);
+    // controls.enableDamping = true;
     // LIGHTS
     // directionalLight.position.set(5, 0, 0);
     // console.log(directionalLight);
@@ -594,11 +595,13 @@ function init() {
     ambientLight = new _three.AmbientLight('#ffffff', 0.5);
     scene.add(ambientLight);
     // Event Listeners
-    window.addEventListener('mousemove', onMouseMove, false);
+    // window.addEventListener('mousemove', onMouseMove, false);
+    document.body.querySelector(".three-wrap").addEventListener('mousemove', onMouseMove, false);
     window.addEventListener('resize', onResize);
     window.addEventListener('click', onClick);
     renderer.setSize(sizes.width, sizes.height);
-    document.body.appendChild(renderer.domElement);
+    // document.body.appendChild(renderer.domElement);
+    document.body.querySelector(".three-wrap").appendChild(renderer.domElement);
 }
 function render() {
     // Update the picking ray with the camera and mouse position
@@ -626,12 +629,13 @@ function animate() {
     render();
     updateCamera();
     requestAnimationFrame(animate);
-    controls.update();
+// controls.update();
 }
 function updateCamera() {
     // Pan camera with movement of mouse
     camera.position.x = cameraCenter.x + cameraHorzLimit * mouse.x;
     camera.position.y = cameraCenter.y + cameraVertLimit * mouse.y;
+    camera.lookAt(new _three.Vector3(0, 0, 0));
 }
 function onClick() {
     // If hovering over a region, log its ID
@@ -641,13 +645,14 @@ function onMouseMove(event) {
     // calculate mouse position in normalized device coordinates
     // (-1 to +1) for both components
     event.preventDefault();
-    mouse.x = event.clientX / window.innerWidth * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    let rect = event.target.getBoundingClientRect();
+    mouse.x = (event.clientX - rect.left) / sizes.width * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / sizes.height) * 2 + 1;
 }
 function onResize() {
     // Update sizes
-    sizes.width = window.innerWidth;
-    sizes.height = window.innerHeight;
+    sizes.width = document.querySelector(".three-wrap").clientWidth;
+    sizes.height = document.querySelector(".three-wrap").clientHeight;
     // Update camera
     camera.aspect = sizes.width / sizes.height;
     camera.updateProjectionMatrix();

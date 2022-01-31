@@ -4,17 +4,17 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import GUI from 'lil-gui';
 
-const gui = new GUI();
+// const gui = new GUI();
 var camera, scene, renderer, controls, intersects;
 let model, meshes;
 var mouse = new THREE.Vector2(1, 1);
 const raycaster = new THREE.Raycaster();
 const clock = new THREE.Clock();
-// Sizes
+// Sizes - Used for Renderer Size, Aspect Ratio, and Mouse Events
 const sizes = {
-  width: window.innerWidth,
-  height: window.innerHeight
-}
+  width: document.querySelector(".three-wrap").clientWidth,
+  height: document.querySelector(".three-wrap").clientHeight
+};
 const aspectRatio = sizes.width / sizes.height;
 let cameraCenter = new THREE.Vector3();
 const cameraHorzLimit = .5;
@@ -31,8 +31,8 @@ animate();
 
 function init() {
   scene = new THREE.Scene();
-  scene.background = new THREE.Color('white');
-  renderer = new THREE.WebGLRenderer({antialias: true});
+  renderer = new THREE.WebGLRenderer({antialias: true, alpha: true});
+  renderer.setClearColor(0x000000, 0);
 
   // GUI
   params = {
@@ -40,10 +40,10 @@ function init() {
     lightColor: accentColor,
     lightIntensity: 15,
   }
-  gui.domElement.style.width = '300px';
-  gui.addColor(params, 'selectionColor').name('Hover Color');
-  gui.addColor(params, 'lightColor').name('Accent Light Color');
-  gui.add(params, 'lightIntensity', 0, 30, .5).name('Accent Light Intensity');;
+  // gui.domElement.style.width = '300px';
+  // gui.addColor(params, 'selectionColor').name('Hover Color');
+  // gui.addColor(params, 'lightColor').name('Accent Light Color');
+  // gui.add(params, 'lightIntensity', 0, 30, .5).name('Accent Light Intensity');
 
   //Init Loader and import model
   var loader = new GLTFLoader();
@@ -65,8 +65,8 @@ function init() {
   cameraCenter.x = camera.position.x;
   cameraCenter.y = camera.position.y;
   // CONTROLS
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
+  // controls = new OrbitControls(camera, renderer.domElement);
+  // controls.enableDamping = true;
   // LIGHTS
   // directionalLight.position.set(5, 0, 0);
   // console.log(directionalLight);
@@ -82,11 +82,13 @@ function init() {
   scene.add(ambientLight);
 
   // Event Listeners
-  window.addEventListener('mousemove', onMouseMove, false);
+  // window.addEventListener('mousemove', onMouseMove, false);
+  document.body.querySelector(".three-wrap").addEventListener('mousemove', onMouseMove, false);
   window.addEventListener('resize', onResize);
   window.addEventListener('click', onClick);
   renderer.setSize(sizes.width, sizes.height);
-  document.body.appendChild(renderer.domElement);
+  // document.body.appendChild(renderer.domElement);
+  document.body.querySelector(".three-wrap").appendChild(renderer.domElement);
 }
 
 function render() {  
@@ -119,13 +121,14 @@ function animate() {
   render();
   updateCamera();
   requestAnimationFrame(animate);
-  controls.update();
+  // controls.update();
 }
 
 function updateCamera() {
   // Pan camera with movement of mouse
   camera.position.x = cameraCenter.x + (cameraHorzLimit * mouse.x);
   camera.position.y = cameraCenter.y + (cameraVertLimit * mouse.y);
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
 }
 
 function onClick(){
@@ -139,14 +142,15 @@ function onMouseMove(event) {
   // calculate mouse position in normalized device coordinates
   // (-1 to +1) for both components
   event.preventDefault();
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  let rect = event.target.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / sizes.width) * 2 - 1;
+  mouse.y = - ((event.clientY - rect.top) / sizes.height) * 2 + 1;
 }
 
 function onResize() {
   // Update sizes
-  sizes.width = window.innerWidth;
-  sizes.height = window.innerHeight;
+  sizes.width = document.querySelector(".three-wrap").clientWidth;
+  sizes.height = document.querySelector(".three-wrap").clientHeight;
 
   // Update camera
   camera.aspect = sizes.width / sizes.height;
