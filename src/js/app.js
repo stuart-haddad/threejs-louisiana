@@ -163,10 +163,9 @@ function onResize() {
 function processSplineGLTF(gltf) {
   model = gltf.scene.children[0];
   model.scale.set(.005, .005, .005);
-  model.position.set(-3, 5, 0);
   scene.add(model);
-  // console.log(model);
-  meshes = model.children.filter(object => object.type === "Mesh");
+  console.log(model);
+  meshes = model.children[0].children.filter(object => object.type === "Mesh");
   meshes.forEach((mesh, index) => {
     // Create a new material for each region so they can be highlighted individually
     mesh.material = new THREE.MeshStandardMaterial();
