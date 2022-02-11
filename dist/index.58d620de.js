@@ -545,7 +545,8 @@ const cameraVertLimit = 0.5;
 let ambientLight, pointAccentLight;
 // const directionalLight = new THREE.DirectionalLight('#77B5BD', 5);
 let accentColor = new _three.Color('#299639');
-let tagColor = new _three.Color('#6FD5E5');
+let hoverColor = new _three.Color('#6FD5E5');
+let selectionColor = new _three.Color('red');
 let stateColor = new _three.Color('#1E1531');
 let params;
 init();
@@ -559,12 +560,12 @@ function init() {
     renderer.setClearColor(0, 0);
     // GUI
     params = {
-        selectionColor: tagColor,
+        hoverColor: hoverColor,
         lightColor: accentColor,
         lightIntensity: 15
     };
     // gui.domElement.style.width = '300px';
-    // gui.addColor(params, 'selectionColor').name('Hover Color');
+    // gui.addColor(params, 'hoverColor').name('Hover Color');
     // gui.addColor(params, 'lightColor').name('Accent Light Color');
     // gui.add(params, 'lightIntensity', 0, 30, .5).name('Accent Light Intensity');
     //Init Loader and import model
@@ -611,14 +612,14 @@ function render() {
     // Allow meshes to load
     if (meshes && meshes.length) {
         meshes.forEach((mesh)=>{
-            mesh.material.color.set(stateColor);
-            if (!mesh.animation.reversed()) mesh.animation.reverse();
+            if (!mesh.selected) mesh.material.color.set(stateColor);
+            if (!mesh.selected && !mesh.animation.reversed()) mesh.animation.reverse();
         });
         // Get the model meshes that are being intersected
         intersects = raycaster.intersectObjects(meshes);
         if (intersects.length) {
             let pickedObject = intersects[0].object;
-            pickedObject.material.color.set(params.selectionColor);
+            if (!pickedObject.selected) pickedObject.material.color.set(params.hoverColor);
             pickedObject.animation.play();
         }
     }
@@ -638,8 +639,16 @@ function updateCamera() {
     camera.lookAt(new _three.Vector3(0, 0, 0));
 }
 function onClick() {
+    // Reset selected region
+    meshes.forEach((mesh)=>{
+        mesh.selected = false;
+    });
     // If hovering over a region, log its ID
-    if (intersects.length) console.log(intersects[0].object.region);
+    if (intersects.length) {
+        intersects[0].object.selected = true;
+        intersects[0].object.material.color.set(selectionColor);
+        console.log(intersects[0].object.region);
+    }
 }
 function onMouseMove(event) {
     // calculate mouse position in normalized device coordinates
@@ -673,6 +682,7 @@ function processSplineGLTF(gltf) {
         mesh.material.roughness = 1;
         mesh.material.flatShading = true;
         mesh.region = index + 1;
+        mesh.selected = false;
         mesh.animation = _gsapDefault.default.to(mesh.position, {
             duration: 0.2,
             z: 25

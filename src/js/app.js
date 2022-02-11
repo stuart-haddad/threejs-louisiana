@@ -22,7 +22,8 @@ const cameraVertLimit = .5;
 let ambientLight, pointAccentLight;
 // const directionalLight = new THREE.DirectionalLight('#77B5BD', 5);
 let accentColor = new THREE.Color('#299639');
-let tagColor = new THREE.Color('#6FD5E5');
+let hoverColor = new THREE.Color('#6FD5E5');
+let selectionColor = new THREE.Color('red');
 let stateColor = new THREE.Color('#1E1531');
 let params;
 
@@ -36,12 +37,12 @@ function init() {
 
   // GUI
   params = {
-    selectionColor: tagColor,
+    hoverColor: hoverColor,
     lightColor: accentColor,
     lightIntensity: 15,
   }
   // gui.domElement.style.width = '300px';
-  // gui.addColor(params, 'selectionColor').name('Hover Color');
+  // gui.addColor(params, 'hoverColor').name('Hover Color');
   // gui.addColor(params, 'lightColor').name('Accent Light Color');
   // gui.add(params, 'lightIntensity', 0, 30, .5).name('Accent Light Intensity');
 
@@ -99,8 +100,10 @@ function render() {
   // Allow meshes to load
   if (meshes && meshes.length) {
     meshes.forEach(mesh => {
-      mesh.material.color.set(stateColor);
-      if (!mesh.animation.reversed()) {
+      if (!mesh.selected) {
+        mesh.material.color.set(stateColor);
+      }
+      if (!mesh.selected && !mesh.animation.reversed()) {
         mesh.animation.reverse();
       }
     });
@@ -109,7 +112,9 @@ function render() {
     intersects = raycaster.intersectObjects(meshes);
     if (intersects.length) {
       let pickedObject = intersects[0].object;
-      pickedObject.material.color.set(params.selectionColor);
+      if (!pickedObject.selected) {
+        pickedObject.material.color.set(params.hoverColor);
+      }
       pickedObject.animation.play();
     }
   }
@@ -131,9 +136,15 @@ function updateCamera() {
   camera.lookAt(new THREE.Vector3(0, 0, 0));
 }
 
-function onClick(){
+function onClick() {
+  // Reset selected region
+  meshes.forEach(mesh => {
+    mesh.selected = false;
+  });
   // If hovering over a region, log its ID
   if (intersects.length) {
+    intersects[0].object.selected = true;
+    intersects[0].object.material.color.set(selectionColor);
     console.log(intersects[0].object.region);
   }
 }
@@ -172,7 +183,8 @@ function processSplineGLTF(gltf) {
     mesh.material.metalness = 0;
     mesh.material.roughness = 1;
     mesh.material.flatShading = true;
-    mesh.region = index + 1; 
+    mesh.region = index + 1;
+    mesh.selected = false;
     mesh.animation = gsap.to(mesh.position, {duration: .2, z: 25});
     mesh.animation.pause();
   });
