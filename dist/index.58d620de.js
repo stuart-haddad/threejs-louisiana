@@ -612,8 +612,10 @@ function render() {
     // Allow meshes to load
     if (meshes && meshes.length) {
         meshes.forEach((mesh)=>{
-            if (!mesh.selected) mesh.material.color.set(stateColor);
-            if (!mesh.selected && !mesh.animation.reversed()) mesh.animation.reverse();
+            if (!mesh.selected) {
+                mesh.material.color.set(stateColor);
+                if (!mesh.animation.reversed()) mesh.animation.reverse();
+            }
         });
         // Get the model meshes that are being intersected
         intersects = raycaster.intersectObjects(meshes);

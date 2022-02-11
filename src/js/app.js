@@ -102,9 +102,9 @@ function render() {
     meshes.forEach(mesh => {
       if (!mesh.selected) {
         mesh.material.color.set(stateColor);
-      }
-      if (!mesh.selected && !mesh.animation.reversed()) {
-        mesh.animation.reverse();
+        if (!mesh.animation.reversed()) {
+          mesh.animation.reverse();
+        }
       }
     });
 
