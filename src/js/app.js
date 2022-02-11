@@ -23,7 +23,7 @@ let ambientLight, pointAccentLight;
 // const directionalLight = new THREE.DirectionalLight('#77B5BD', 5);
 let accentColor = new THREE.Color('#299639');
 let hoverColor = new THREE.Color('#6FD5E5');
-let selectionColor = new THREE.Color('red');
+let selectionColor = new THREE.Color('#71C3BF');
 let stateColor = new THREE.Color('#1E1531');
 let params;
 
