@@ -560,11 +560,13 @@ function init() {
     renderer.setClearColor(0, 0);
     // GUI
     params = {
+        stateColor: stateColor,
         hoverColor: hoverColor,
         lightColor: accentColor,
         lightIntensity: 15
     };
     gui.domElement.style.width = '300px';
+    gui.addColor(params, 'stateColor').name('State Base Color');
     gui.addColor(params, 'hoverColor').name('Hover Color');
     gui.addColor(params, 'lightColor').name('Accent Light Color');
     gui.add(params, 'lightIntensity', 0, 30, 0.5).name('Accent Light Intensity');
@@ -613,7 +615,7 @@ function render() {
     if (meshes && meshes.length) {
         meshes.forEach((mesh)=>{
             if (!mesh.selected) {
-                mesh.material.color.set(stateColor);
+                mesh.material.color.set(params.stateColor);
                 if (!mesh.animation.reversed()) mesh.animation.reverse();
             }
         });
