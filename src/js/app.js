@@ -4,7 +4,7 @@ import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls.js';
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js';
 import GUI from 'lil-gui';
 
-// const gui = new GUI();
+const gui = new GUI();
 var camera, scene, renderer, controls, intersects;
 let model, meshes;
 var mouse = new THREE.Vector2(1, 1);
@@ -41,10 +41,10 @@ function init() {
     lightColor: accentColor,
     lightIntensity: 15,
   }
-  // gui.domElement.style.width = '300px';
-  // gui.addColor(params, 'hoverColor').name('Hover Color');
-  // gui.addColor(params, 'lightColor').name('Accent Light Color');
-  // gui.add(params, 'lightIntensity', 0, 30, .5).name('Accent Light Intensity');
+  gui.domElement.style.width = '300px';
+  gui.addColor(params, 'hoverColor').name('Hover Color');
+  gui.addColor(params, 'lightColor').name('Accent Light Color');
+  gui.add(params, 'lightIntensity', 0, 30, .5).name('Accent Light Intensity');
 
   //Init Loader and import model
   var loader = new GLTFLoader();

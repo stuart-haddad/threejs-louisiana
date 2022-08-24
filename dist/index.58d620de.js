@@ -527,7 +527,7 @@ var _orbitControlsJs = require("three/examples/jsm/controls/OrbitControls.js");
 var _gltfloaderJs = require("three/examples/jsm/loaders/GLTFLoader.js");
 var _lilGui = require("lil-gui");
 var _lilGuiDefault = parcelHelpers.interopDefault(_lilGui);
-// const gui = new GUI();
+const gui = new _lilGuiDefault.default();
 var camera, scene, renderer, controls, intersects;
 let model, meshes;
 var mouse = new _three.Vector2(1, 1);
@@ -564,10 +564,10 @@ function init() {
         lightColor: accentColor,
         lightIntensity: 15
     };
-    // gui.domElement.style.width = '300px';
-    // gui.addColor(params, 'hoverColor').name('Hover Color');
-    // gui.addColor(params, 'lightColor').name('Accent Light Color');
-    // gui.add(params, 'lightIntensity', 0, 30, .5).name('Accent Light Intensity');
+    gui.domElement.style.width = '300px';
+    gui.addColor(params, 'hoverColor').name('Hover Color');
+    gui.addColor(params, 'lightColor').name('Accent Light Color');
+    gui.add(params, 'lightIntensity', 0, 30, 0.5).name('Accent Light Intensity');
     //Init Loader and import model
     var loader = new _gltfloaderJs.GLTFLoader();
     loader.load('models/state-map.gltf', function(gltf) {
