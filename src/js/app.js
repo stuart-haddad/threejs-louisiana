@@ -64,7 +64,7 @@ function init() {
 
   // CAMERA
   camera = new THREE.PerspectiveCamera(75, aspectRatio, 0.1, 100);
-  camera.position.set(1.5, 0, 5);
+  camera.position.set(2.5, 0, 5);
   cameraCenter.x = camera.position.x;
   cameraCenter.y = camera.position.y;
   // CONTROLS
